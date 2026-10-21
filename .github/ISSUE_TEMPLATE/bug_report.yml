@@ -1,0 +1,25 @@
+name: 操作或兼容问题
+description: 报告可复现的UI操作或离线排序问题
+title: "[Bug] "
+body:
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境
+      description: macOS、同花顺客户端版本、桌面工具名称；请勿填写账号或凭据。
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 复现步骤与预期结果
+      description: 使用合成组名/代码，注明主窗口、设置或添加弹窗的层级。
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果与验证范围
+      description: 区分静态检查、只读观察和已授权写入回读；请先脱敏。
+    validations:
+      required: true

@@ -1,0 +1,51 @@
+{
+  "synthetic_example": true,
+  "trade_date": "2026-10-20",
+  "final_data_verified": true,
+  "risk_warning_filtered": true,
+  "system_group": "自选股",
+  "fixed_prefix": [
+    "自选股",
+    "观察"
+  ],
+  "non_st_final_limit_up_codes": [
+    "000001",
+    "000002"
+  ],
+  "groups": [
+    {
+      "name": "自选股",
+      "members": [
+        "000001",
+        "000002",
+        "KS11"
+      ],
+      "complete": true
+    },
+    {
+      "name": "示例组甲",
+      "members": [
+        "000001"
+      ],
+      "complete": true
+    },
+    {
+      "name": "观察",
+      "members": [],
+      "complete": true
+    },
+    {
+      "name": "示例组乙",
+      "members": [
+        "000001",
+        "000002"
+      ],
+      "complete": true
+    },
+    {
+      "name": "示例组丙",
+      "members": [],
+      "complete": true
+    }
+  ]
+}
