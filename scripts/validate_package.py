@@ -8,13 +8,16 @@ import re
 
 def validate(root):
     errors = []
-    required = ["SKILL.md", "README.md", "README.en.md", "LICENSE", "agents/openai.yaml", "references/computer-use.md", "references/reorder.md", "references/troubleshooting.md"]
+    required = ["README.md", "README.en.md", "LICENSE", ".github/workflows/validate.yml"]
+    for name in ["tonghuashun-ui-maintenance", "a-share-daily-limit-up-classification"]:
+        folder = root/"skills"/name
+        required.extend([f"skills/{name}/SKILL.md", f"skills/{name}/agents/openai.yaml"])
+        skill = (folder/"SKILL.md").read_text(encoding="utf-8") if (folder/"SKILL.md").exists() else ""
+        if not re.match(r"---\nname: " + re.escape(name) + r"\ndescription: .+?\n---", skill, re.S):
+            errors.append(f"invalid skill frontmatter: {name}")
     for name in required:
         if not (root/name).is_file():
             errors.append(f"missing file: {name}")
-    skill = (root/"SKILL.md").read_text(encoding="utf-8") if (root/"SKILL.md").exists() else ""
-    if not re.match(r"---\nname: tonghuashun-ui-maintenance\ndescription: .+?\n---", skill, re.S):
-        errors.append("invalid skill frontmatter")
     patterns = [r"/(?:Users|home)/[^/\s]+/", r"gh[pousr]_[A-Za-z0-9]{20,}", r"github_pat_[A-Za-z0-9_]{20,}", r"sk-[A-Za-z0-9]{24,}"]
     checked = 0
     for path in root.rglob("*"):

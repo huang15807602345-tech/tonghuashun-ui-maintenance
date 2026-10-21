@@ -1,0 +1,316 @@
+{
+  "schema_version": "4.0",
+  "synthetic_example": true,
+  "trade_date": "2026-08-26",
+  "scope": "non_st_final_limit_up",
+  "generated_at": "2026-08-26T16:35:00+08:00",
+  "source_policy": {
+    "minimum_reason_websites": 3,
+    "preferred": [
+      "xuangubao",
+      "eastmoney",
+      "tonghuashun"
+    ],
+    "st_detail_policy": "exclude_before_detail"
+  },
+  "population": {
+    "status": "reconciled",
+    "source_counts": {
+      "xuangubao": 3,
+      "eastmoney": 3,
+      "tonghuashun": 3
+    },
+    "non_st_count": 2,
+    "excluded_risk_warning_count": 1,
+    "codes_sha256": "29da14b6cfdac6e7f6d18988a49b2d883f2d2ca7ddc458c8ee6390673c6b5147",
+    "conflicts": [],
+    "codes": [
+      "000001",
+      "000002"
+    ],
+    "final_data_verified": true
+  },
+  "group_snapshot": {
+    "captured_at": "2026-08-26T16:40:00+08:00",
+    "source": "live_ui",
+    "groups": [
+      "自选股",
+      "液冷",
+      "消费"
+    ],
+    "complete": true,
+    "ui_total": 3
+  },
+  "rows": [
+    {
+      "code": "000001",
+      "name": "示例科技",
+      "board_pattern": "2天2板",
+      "first_limit_time": "09:31:00",
+      "source_reasons": {
+        "xuangubao": {
+          "status": "complete",
+          "concepts": [
+            "液冷服务器"
+          ],
+          "reason": "液冷服务器；产品进入数据中心散热场景。",
+          "url": "https://xuangubao.cn/example/000001",
+          "retrieved_at": "2026-08-26T16:31:00+08:00",
+          "reason_date": "2026-08-26",
+          "material_type": "daily_limit_up_reason",
+          "verified": true,
+          "provenance": {
+            "kind": "original"
+          }
+        },
+        "eastmoney": {
+          "status": "complete",
+          "concepts": [
+            "数据中心"
+          ],
+          "reason": "数据中心散热需求提升。",
+          "url": "https://eastmoney.com/example/000001",
+          "retrieved_at": "2026-08-26T16:31:30+08:00",
+          "reason_date": "2026-08-26",
+          "material_type": "daily_limit_up_reason",
+          "verified": true,
+          "provenance": {
+            "kind": "original"
+          }
+        },
+        "tonghuashun": {
+          "status": "complete",
+          "concepts": [
+            "液冷服务器",
+            "数据中心"
+          ],
+          "reason": "液冷产品订单与数据中心散热催化。",
+          "url": "https://basic.10jqka.com.cn/000001/",
+          "retrieved_at": "2026-08-26T16:32:00+08:00",
+          "reason_date": "2026-08-26",
+          "material_type": "daily_limit_up_reason",
+          "verified": true,
+          "provenance": {
+            "kind": "original"
+          }
+        }
+      },
+      "company_business_basis": "主营冷板式液冷设备及数据中心热管理产品。",
+      "instant_catalyst": "披露液冷产品新增订单。",
+      "market_context_evidence": [
+        "合成样本：目标股D日独立涨停，近十日同分类另有000003与000004活跃；有持续订单催化，不声称D日另有两只涨停。"
+      ],
+      "market_trading_reason": "液冷服务器订单与板块共振。",
+      "stock_specific_amplifier": "2天2板且封板较早。",
+      "reason_selection": {
+        "selected_source": "tonghuashun",
+        "selected_reason": "液冷产品订单与数据中心散热催化。",
+        "why_closest": "同花顺原因同时匹配直接业务、当日订单和液冷同类盘面响应。",
+        "counterevidence": [
+          "东方财富只给出较宽的数据中心标签。"
+        ],
+        "confidence": "high",
+        "initial_confidence": "high",
+        "confidence_basis": "同花顺原因同时匹配直接业务、当日订单和液冷同类盘面响应。"
+      },
+      "classification": {
+        "status": "classified",
+        "primary_group": "液冷",
+        "target_group": "液冷",
+        "relation_tier": "direct",
+        "basis": "业务、催化和盘面均直接对应液冷。",
+        "alternative_groups": [
+          "硬件"
+        ],
+        "existing_wrong_groups": [],
+        "mode": "single",
+        "assignments": [
+          {
+            "primary_group": "液冷",
+            "target_group": "液冷",
+            "relation_tier": "direct",
+            "basis": "业务、催化和盘面均直接对应液冷。",
+            "market_trading_reason": "液冷服务器订单与板块共振。",
+            "confidence": "high",
+            "confidence_basis": "同花顺原因同时匹配直接业务、当日订单和液冷同类盘面响应。",
+            "evidence_refs": [
+              "synthetic://three-site-causes-and-market-response"
+            ]
+          }
+        ]
+      },
+      "recognizability": {
+        "level": "high",
+        "evidence": [
+          "2天2板",
+          "液冷方向较早封板"
+        ]
+      },
+      "evidence_status": "complete",
+      "unclassified_reason": "",
+      "ui_plan": {
+        "action": "add",
+        "source_group": null,
+        "target_group": "液冷",
+        "reason": "冻结分类决定为液冷。",
+        "target_groups": [
+          "液冷"
+        ]
+      },
+      "continuous_limit_up_days": 2,
+      "continuous_days_evidence": "合成测试数据，不是真实行情",
+      "theme_filter_results": {
+        "液冷": "include"
+      }
+    },
+    {
+      "code": "000002",
+      "name": "示例事件",
+      "board_pattern": "首板",
+      "first_limit_time": "10:15:00",
+      "source_reasons": {
+        "xuangubao": {
+          "status": "complete",
+          "concepts": [
+            "股权转让"
+          ],
+          "reason": "控制权拟发生变更。",
+          "url": "https://xuangubao.cn/example/000002",
+          "retrieved_at": "2026-08-26T16:31:00+08:00",
+          "reason_date": "2026-08-26",
+          "material_type": "daily_limit_up_reason",
+          "verified": true,
+          "provenance": {
+            "kind": "original"
+          }
+        },
+        "eastmoney": {
+          "status": "complete",
+          "concepts": [
+            "并购重组"
+          ],
+          "reason": "控股股东筹划股权转让。",
+          "url": "https://eastmoney.com/example/000002",
+          "retrieved_at": "2026-08-26T16:31:30+08:00",
+          "reason_date": "2026-08-26",
+          "material_type": "daily_limit_up_reason",
+          "verified": true,
+          "provenance": {
+            "kind": "original"
+          }
+        },
+        "tonghuashun": {
+          "status": "complete",
+          "concepts": [
+            "控制权变更"
+          ],
+          "reason": "控制权变更预期。",
+          "url": "https://basic.10jqka.com.cn/000002/",
+          "retrieved_at": "2026-08-26T16:32:00+08:00",
+          "reason_date": "2026-08-26",
+          "material_type": "daily_limit_up_reason",
+          "verified": true,
+          "provenance": {
+            "kind": "original"
+          }
+        }
+      },
+      "company_business_basis": "主营传统制造业务。",
+      "instant_catalyst": "控股股东筹划股权转让。",
+      "market_context_evidence": [],
+      "market_trading_reason": "纯控制权变更事件。",
+      "stock_specific_amplifier": "个股事件，无目标外直接同类。",
+      "reason_selection": {
+        "selected_source": "eastmoney",
+        "selected_reason": "控股股东筹划股权转让。",
+        "why_closest": "该原因与公告和孤立个股表现一致，其他产业概念没有盘面证据。",
+        "counterevidence": [
+          "不存在可确认的独立主线概念。"
+        ],
+        "confidence": "medium",
+        "initial_confidence": "medium",
+        "confidence_basis": "该原因与公告和孤立个股表现一致，其他产业概念没有盘面证据。"
+      },
+      "classification": {
+        "status": "unclassified",
+        "primary_group": null,
+        "target_group": null,
+        "relation_tier": "none",
+        "basis": "纯并购或控制权变更且无独立主线，不分类。",
+        "alternative_groups": [],
+        "existing_wrong_groups": [],
+        "mode": "none",
+        "assignments": []
+      },
+      "recognizability": {
+        "level": "exclude",
+        "evidence": [
+          "纯个股事件"
+        ]
+      },
+      "evidence_status": "partial",
+      "unclassified_reason": "纯控制权变更，没有更强真实交易概念。",
+      "ui_plan": {
+        "action": "none",
+        "source_group": null,
+        "target_group": null,
+        "reason": "未分类，不进入同花顺。",
+        "target_groups": []
+      },
+      "continuous_limit_up_days": 1,
+      "continuous_days_evidence": "合成测试数据，不是真实行情",
+      "unclassified_kind": "independent_event",
+      "theme_filter_results": {}
+    }
+  ],
+  "summary": {
+    "classified_count": 1,
+    "unclassified_count": 1
+  },
+  "new_groups": [],
+  "theme_activity": {
+    "液冷": {
+      "mapping_basis": "合成样本：液冷短线主分类，按当日原因映射而非自选组反推。",
+      "today": {
+        "status": "verified",
+        "codes": [
+          "000001"
+        ],
+        "evidence_refs": [
+          "synthetic://D-final-theme-population"
+        ]
+      },
+      "history": {
+        "status": "verified",
+        "trading_dates": [
+          "2026-08-13",
+          "2026-08-14",
+          "2026-08-17",
+          "2026-08-18",
+          "2026-08-19",
+          "2026-08-20",
+          "2026-08-21",
+          "2026-08-24",
+          "2026-08-25",
+          "2026-08-26"
+        ],
+        "calendar_verified": true,
+        "codes": [
+          "000001",
+          "000003",
+          "000004"
+        ],
+        "evidence_refs": [
+          "synthetic://ten-day-calendar-pools-and-theme-attribution"
+        ]
+      },
+      "niche": {
+        "value": false,
+        "basis": "合成样本：数据中心液冷有持续订单逻辑与近期多股交易。",
+        "evidence_refs": [
+          "synthetic://industry-driver"
+        ]
+      }
+    }
+  }
+}

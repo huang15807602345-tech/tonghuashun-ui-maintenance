@@ -6,6 +6,7 @@
 
 ```bash
 python3 -m unittest discover -s tests -v
+python3 -B skills/a-share-daily-limit-up-classification/scripts/test_classification.py
 python3 scripts/validate_package.py
 ```
 
@@ -16,3 +17,5 @@ UI改动应先只读确认控件和窗口来源，在获得授权的范围内验
 更改操作语义时同步更新相关附录和示例。一次改动集中解决一个问题，不添加固定坐标、固定元素编号、特定模型或维护者个人路径。不要在没有授权时将读操作扩展为清空、删除或全库整理。
 
 提交贡献表示你有权以本仓库的MIT许可证提供这些内容。
+
+研究模块的改动还应说明来源日期、转载关系、未知值处理与分类证据条件。合成测试通过不能证明某只真实股票的涨停因果。

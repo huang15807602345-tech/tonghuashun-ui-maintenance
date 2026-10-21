@@ -1,0 +1,45 @@
+{
+  "schema_version": "4.0",
+  "synthetic_example": true,
+  "trade_date": "2026-08-26",
+  "classification_sha256": "e2ee4213fc47ba4d4ec59b50cec13afef87ac2c5c5d145965c3a9a4dceae104f",
+  "app": "同花顺",
+  "preflight": {
+    "main_window": true,
+    "window_layout_preserved": true,
+    "group_dialog_verified": true
+  },
+  "group_snapshot": {
+    "captured_at": "2026-08-26T16:45:00+08:00",
+    "groups": [
+      "自选股",
+      "液冷",
+      "消费"
+    ]
+  },
+  "by_code": {
+    "000001": {
+      "action": "add",
+      "target_group": "液冷",
+      "status": "added",
+      "verification_method": "目标分组搜索结果显示 search remove，并在完成后重新进入目标组复核。",
+      "verified_at": "2026-08-26T16:46:00+08:00",
+      "note": "合成测试回执，不对应真实股票或真实UI写入。",
+      "verified_target_group": "液冷",
+      "readback_verified": true,
+      "targets": [
+        {
+          "target_group": "液冷",
+          "verified_target_group": "液冷",
+          "status": "added",
+          "verification_method": "目标分组搜索结果显示 search remove，并在完成后重新进入目标组复核。",
+          "verified_at": "2026-08-26T16:46:00+08:00",
+          "readback_verified": true
+        }
+      ]
+    }
+  },
+  "settings_saved": true,
+  "ended_on_correct_page": true,
+  "completed_at": "2026-08-26T16:47:00+08:00"
+}

@@ -6,14 +6,14 @@ from pathlib import Path
 import unittest
 
 ROOT = Path(__file__).resolve().parent.parent
-SPEC = importlib.util.spec_from_file_location("planner", ROOT/"scripts/plan_group_order.py")
+SPEC = importlib.util.spec_from_file_location("planner", ROOT/"skills/tonghuashun-ui-maintenance/scripts/plan_group_order.py")
 planner = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(planner)
 
 
 class OrderingTests(unittest.TestCase):
     def setUp(self):
-        self.data = json.loads((ROOT/"examples/sorting-input.json").read_text(encoding="utf-8"))
+        self.data = json.loads((ROOT/"skills/tonghuashun-ui-maintenance/examples/sorting-input.json").read_text(encoding="utf-8"))
 
     def test_counts_and_requested_prefix(self):
         plan = planner.plan_order(self.data)

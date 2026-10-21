@@ -1,4 +1,4 @@
-name: Validate skill and offline planner
+name: Validate skills and offline tools
 on:
   push:
   pull_request:
@@ -11,5 +11,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run offline tests
         run: python3 -m unittest discover -s tests -v
+      - name: Validate research contract and handoff
+        run: python3 -B skills/a-share-daily-limit-up-classification/scripts/test_classification.py
       - name: Validate package
         run: python3 scripts/validate_package.py

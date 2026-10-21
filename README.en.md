@@ -1,35 +1,68 @@
-# Tonghuashun UI Maintenance
+# Tonghuashun Limit-Up Research and UI Maintenance
 
-[简体中文](README.md) · [Skill](SKILL.md) · [MIT License](LICENSE)
+[中文](README.md) · [Research skill](skills/a-share-daily-limit-up-classification/SKILL.md) · [UI skill](skills/tonghuashun-ui-maintenance/SKILL.md) · [MIT License](LICENSE)
 
-An agent skill for maintaining watchlist groups in the macOS Tonghuashun desktop client. It covers exact group/member lookup, additions, removals, moves, multiple requested destinations, ordering, local recovery, and verification after saving.
+An agent-skill bundle for the repetitive work of researching daily A-share limit-ups and organizing watchlist groups in the macOS Tonghuashun client. A compatible AI environment researches the complete non-ST closing limit-up population, compares at least three reason websites and the session's market behavior, then operates the desktop client to save and verify the classifications.
 
-The repository contains instructions and an optional offline ordering helper. It does not bundle the client, a desktop-control runtime, market data, or trading automation. An agent must have authorized access to the user's Mac and read its current desktop-tool documentation. Browser-only and cloud-only environments cannot operate the local client.
+Classification is an evidence-based judgment, not a guarantee of causal accuracy. Missing evidence, conflicting explanations and independent company events remain explicit in the report.
 
-## Install and use
+## Modules
 
-Clone this repository into a new directory and load its `SKILL.md` in an Agent Skills-compatible environment. A local Codex installation can use `~/.codex/skills/tonghuashun-ui-maintenance/`. Compare and back up any existing personal version before installing.
+| Module | Responsibility | Output |
+| --- | --- | --- |
+| `a-share-daily-limit-up-classification` | Verify the final population, dated sources, catalysts and market linkage; investigate low-confidence cases | Evidence-backed JSON/report and a UI manifest |
+| `tonghuashun-ui-maintenance` | Read groups, add/remove/move members, create groups and order them in the confirmed main window | Per-stock/per-target saved-state receipts and remaining work |
 
-Start with a read-only request to list group names, order, and UI totals. For mutations, provide exact stock-code strings, source/destination groups, and scope. The skill preserves the designated main window and other viewing windows. Group clearing and deletion require an explicit request.
+Flow: read the live group catalog → research every eligible stock → validate → apply through the UI → reopen and verify → optionally refresh consecutive-limit-up groups and ordering. Either module can also be used independently within the requested scope.
 
-The skill is independent of model names. The CUA examples in `references/computer-use.md` describe one tool adapter; inspect the current runtime rather than assuming that API exists everywhere.
+## Behavior
 
-## Optional offline helper
+- Prefer Tonghuashun, Eastmoney and Xuangubao, with other reliable sites allowed. Retain original pages, dates, reasons and repost provenance; search snippets are not verification.
+- Compare catalysts, actual business, intraday timing, representative stocks and counterevidence. Do not infer leadership or causality from a static concept label or closing return.
+- Reuse suitable existing groups. New groups require members, linkage evidence and a reason existing groups do not fit. Taxonomy and aliases come from the caller.
+- Support a single main classification or two separately justified main classifications. Every destination must be saved and read back.
+- Distinguish unresolved evidence, independent events and exclusions. The validator implements the documented [default niche-exclusion rule](skills/a-share-daily-limit-up-classification/references/classification-preferences.md); changing its algorithm also requires code and test updates.
+- Add and verify all destinations before removing confirmed wrong source memberships. Preserve functional groups and other quote windows.
+- Require actual consecutive daily limit-ups for the consecutive-limit-up group. Count only verified eligible final limit-ups when ordering; preserve observed order on ties and use caller-configured fixed prefixes. Unknown is never zero.
 
-Python 3.10+ and the standard library are sufficient:
+## Requirements and installation
+
+Research needs an AI environment with web access and evidence storage. Applying changes additionally requires macOS, Tonghuashun and desktop-control tools with the necessary Accessibility/Screen Recording permissions. A web-only chat or cloud executor cannot control your local client simply by loading these files.
+
+The repository does not include a desktop runtime, market-data subscription, client or credentials. It does not require a particular model, chat ID or 15:30 start time. Preparation can start earlier; final-close writes wait for verified final data. Historical runs and resumable work are supported.
 
 ```bash
-python3 scripts/plan_group_order.py --input examples/sorting-input.json
+git clone https://github.com/huang15807602345-tech/tonghuashun-ui-maintenance.git
+```
+
+Load both complete directories under `skills/` in an Agent Skills-compatible environment. For local Codex skills, place each directory under `~/.codex/skills/`. Compare and back up any existing personal version first. Keep run data outside the skill directories. Read your environment's current desktop-tool documentation; the [CUA examples](skills/tonghuashun-ui-maintenance/references/computer-use.md) are adapters, not universal APIs.
+
+Start with a read-only catalog and confirm the main window before authorizing maintenance. Example:
+
+```text
+Use $a-share-daily-limit-up-classification for all non-ST closing limit-ups on the specified trading date.
+Read the current group catalog, verify at least three reason websites per stock and evaluate session linkage.
+After validation, use $tonghuashun-ui-maintenance to apply and reopen every destination for verification.
+Report unresolved evidence and incomplete actions. Preserve other quote windows.
+```
+
+For research only, explicitly request no desktop changes. Clearing or deleting groups and rebuilding the whole catalog require an explicit scope; ordinary classification does not imply these actions.
+
+## Offline checks
+
+Python 3.10+; helper scripts use the standard library:
+
+```bash
+python3 skills/tonghuashun-ui-maintenance/scripts/plan_group_order.py --input skills/tonghuashun-ui-maintenance/examples/sorting-input.json
 python3 -m unittest discover -s tests -v
+python3 -B skills/a-share-daily-limit-up-classification/scripts/test_classification.py
 python3 scripts/validate_package.py
 ```
 
-The helper validates supplied data and computes a stable group order and reverse pin sequence. It never fetches market data or modifies the desktop. The caller must verify the date, final non-risk-warning limit-up set and complete live membership. Example data is synthetic.
+The research module includes run initialization, an F10 clue collector, classification validation and UI-manifest generation; see its [data contract](skills/a-share-daily-limit-up-classification/references/run-contract.md). Collection is not automatic verification or a complete market-data source. Fixtures are synthetic, including sample UI receipts, and must not be presented as real research or successful UI writes.
 
-## Verification and limits
+Tests cover offline behavior and structure, not live-market causality or client persistence. Real completion requires dated evidence and saved-state readback. Interface changes and connection errors require fresh observation and only the remaining delta. Not every model, macOS release or client version has been tested.
 
-The instructions were developed through a real desktop workflow, but the public release has not been tested across all models or client versions. Automated checks validate offline logic and package integrity, not live UI outcomes. Every action needs a fresh observation, and completion requires reopening saved settings and reading back exact members/order.
+No account reading, trading, order cancellation, transfers or direct modification of the client's configuration database. See [CONTRIBUTING](CONTRIBUTING.md) for reproducible, sanitized reports. Do not submit credentials, trades, personal paths or unredacted screenshots.
 
-This project does not read brokerage accounts, place/cancel orders, transfer funds, edit client databases, or determine stock-market causes. See `CONTRIBUTING.md` for privacy-conscious bug reporting. AI assistance is used in development; maintainers remain responsible for review and validation.
-
-Independent community project, not affiliated with Tonghuashun or OpenAI. Original repository content is MIT-licensed; third-party products retain their own terms.
+AI-assisted project, unaffiliated with Tonghuashun or OpenAI. Original repository content is MIT-licensed; third-party clients, websites and tools retain their own terms.

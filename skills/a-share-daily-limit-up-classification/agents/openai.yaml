@@ -1,0 +1,4 @@
+interface:
+  display_name: "A股涨停原因分类"
+  short_description: "三源短线归因与置信度判断，低置信度补查走势，支持单或双主分类"
+  default_prompt: "使用 $a-share-daily-limit-up-classification 对指定交易日全部非ST最终涨停股做三家原因网站交叉核验，按短线主分类评置信度；低置信度发散搜索并比较当天走势，按单/双主分类及小众排除规则处理，实际写入后逐码逐组保存核验。"
