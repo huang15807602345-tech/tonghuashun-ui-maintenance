@@ -6,6 +6,14 @@ An agent-skill bundle for the repetitive work of researching daily A-share limit
 
 Classification is an evidence-based judgment, not a guarantee of causal accuracy. Missing evidence, conflicting explanations and independent company events remain explicit in the report.
 
+## Desktop demo
+
+Creating two demo groups in the macOS Tonghuashun client, adding stocks from a demo list, and saving the changes.
+
+https://github.com/user-attachments/assets/f86f7d66-a8f9-4b92-aef2-3c760cf85b1d
+
+About 52 seconds, with chat footage and idle waits removed; operations remain at their original speed. The final three-second still is explicitly labeled post-recording verification: readback found that group 2 was missing `600028`, which was added and saved after the recording, then verified as a ten-stock group. That still documents the later readback, not an action captured in the original recording. The stocks are demonstration inputs; this video covers UI maintenance, not limit-up cause research.
+
 ## Modules
 
 | Module | Responsibility | Output |
