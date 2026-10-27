@@ -86,6 +86,26 @@ class OrderingTests(unittest.TestCase):
         planner.plan_order(self.data)
         self.assertEqual(before, self.data)
 
+    def test_unknown_system_members_are_not_a_fake_zero(self):
+        self.data["groups"][0].update(complete=False, members=None)
+        plan = planner.plan_order(self.data)
+        self.assertIsNone(plan["group_counts"]["自选股"])
+        self.assertEqual(plan["target_order"][0], "自选股")
+        self.assertEqual(plan["group_counts"]["示例组乙"], 2)
+
+    def test_unknown_ordinary_group_blocks_ranking(self):
+        self.data["groups"][1].update(complete=False, members=None)
+        with self.assertRaises(ValueError):
+            planner.plan_order(self.data)
+
+    def test_explicit_system_alias_can_have_unknown_members(self):
+        self.data["system_group"] = "系统组"
+        self.data["fixed_prefix"][0] = "系统组"
+        self.data["groups"][0].update(name="系统组", complete=False, members=None)
+        plan = planner.plan_order(self.data)
+        self.assertIsNone(plan["group_counts"]["系统组"])
+        self.assertEqual(plan["target_order"][0], "系统组")
+
     def test_malformed_inputs_are_rejected(self):
         for value in (None, [], "data"):
             with self.assertRaises(ValueError): planner.plan_order(value)

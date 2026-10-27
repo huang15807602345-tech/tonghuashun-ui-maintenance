@@ -1,4 +1,4 @@
 interface:
   display_name: "同花顺 UI 分组维护"
-  short_description: "在同花顺主窗口维护自选分组与排序，保持看盘分屏不动，并保存核验"
-  default_prompt: "使用 $tonghuashun-ui-maintenance，在同花顺主窗口及其分组弹窗内完成我指定的维护；保留其它看盘分屏和窗口大小，复用当前正确页面，按组操作并保存后核验。"
+  short_description: "本地文件只读盘点与保存确认，主窗口批量维护分组，保留其它看盘分屏"
+  default_prompt: "使用 $tonghuashun-ui-maintenance，先从同花顺本地文件读取当前分组和差集，在确认的主窗口按组维护，再以保存后的本地文件核验；保留其它看盘分屏和窗口大小。"

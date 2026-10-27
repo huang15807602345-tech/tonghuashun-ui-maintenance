@@ -32,19 +32,23 @@ def plan_order(data):
     pool = set(final_codes)
     groups = data.get("groups")
     require(isinstance(groups, list) and bool(groups), "groups must be a complete nonempty array")
+    system = data.get("system_group", "自选股")
     names, counts = [], {}
     for group in groups:
         require(isinstance(group, dict), "each group must be an object")
         name = group.get("name")
         require(isinstance(name, str) and bool(name.strip()), "group name must be a nonempty string")
         require(name not in names, "duplicate group name")
+        if name == system and group.get("complete") is False and group.get("members") is None:
+            names.append(name)
+            counts[name] = None
+            continue
         require(group.get("complete") is True, f"membership incomplete: {name}")
         members = string_list(group.get("members"), "members")
         if "ui_total" in group:
             require(type(group["ui_total"]) is int and group["ui_total"] == len(set(members)), f"UI member total mismatch: {name}")
         names.append(name)
         counts[name] = len(set(members) & pool)
-    system = data.get("system_group", "自选股")
     require(isinstance(system, str) and names[0] == system, "the verified system group must already be first")
     prefix = string_list(data.get("fixed_prefix", [system]), "fixed_prefix")
     require(bool(prefix) and prefix[0] == system, "fixed_prefix must start with the system group")

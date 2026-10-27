@@ -8,7 +8,11 @@ import re
 
 def validate(root):
     errors = []
-    required = ["README.md", "README.en.md", "LICENSE", ".github/workflows/validate.yml"]
+    required = ["README.md", "README.en.md", "LICENSE", "CHANGELOG.md", ".github/workflows/validate.yml",
+                "skills/tonghuashun-ui-maintenance/scripts/local_groups.py",
+                "skills/tonghuashun-ui-maintenance/scripts/ui_ops.mjs",
+                "skills/tonghuashun-ui-maintenance/references/local-files.md",
+                "skills/tonghuashun-ui-maintenance/references/operation-functions.md"]
     for name in ["tonghuashun-ui-maintenance", "a-share-daily-limit-up-classification"]:
         folder = root/"skills"/name
         required.extend([f"skills/{name}/SKILL.md", f"skills/{name}/agents/openai.yaml"])
@@ -23,7 +27,7 @@ def validate(root):
     for path in root.rglob("*"):
         if not path.is_file() or any(part in {".git", "__pycache__"} for part in path.relative_to(root).parts):
             continue
-        if path.suffix not in {".md", ".py", ".json", ".yaml", ".yml"} and path.name not in {"LICENSE", ".gitignore"}:
+        if path.suffix not in {".md", ".py", ".mjs", ".json", ".yaml", ".yml"} and path.name not in {"LICENSE", ".gitignore"}:
             continue
         checked += 1
         content = path.read_text(encoding="utf-8")

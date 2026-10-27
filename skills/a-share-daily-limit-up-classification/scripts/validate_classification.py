@@ -251,7 +251,18 @@ def _validate_classification(doc, stage, checks):
     snapshot = doc.get('group_snapshot') if isinstance(doc.get('group_snapshot'), dict) else {}
     groups = snapshot.get('groups')
     group_ok = isinstance(groups, list) and bool(groups) and all(text(g) for g in groups)
-    checks.add('live_complete_group_snapshot', group_ok and len(set(groups)) == len(groups) and snapshot.get('complete') is True and snapshot.get('source') == 'live_ui' and snapshot.get('ui_total') == len(groups) and timestamp(snapshot.get('captured_at')))
+    source_ok = snapshot.get('source') == 'live_ui'
+    if snapshot.get('source') == 'local_file':
+        try:
+            ref = Path(snapshot.get('snapshot_path', ''))
+            local = json.loads(ref.read_text(encoding='utf-8')) if ref.is_absolute() else {}
+            source_ok = (local.get('schema_version') == 'ths-local-groups-1'
+                         and local.get('source') == 'local_file' and local.get('status') == 'complete'
+                         and local.get('directory_complete') is True and local.get('order') == groups
+                         and local.get('captured_at') == snapshot.get('captured_at'))
+        except (OSError, ValueError, TypeError):
+            source_ok = False
+    checks.add('live_complete_group_snapshot', group_ok and len(set(groups)) == len(groups) and snapshot.get('complete') is True and source_ok and snapshot.get('ui_total') == len(groups) and timestamp(snapshot.get('captured_at')))
     groups = groups if group_ok else []
     proposals = doc.get('new_groups', [])
     new_groups = {}
@@ -397,12 +408,28 @@ def _validate_ui(doc, audit, classification_path, classified_codes, checks, stri
     expected_sha = sha256_file(classification_path)
     checks.add('ui_classification_hash', audit.get('classification_sha256') == expected_sha)
     preflight = audit.get('preflight') if isinstance(audit.get('preflight'), dict) else {}
-    checks.add('ui_preflight', all(preflight.get(k) is True for k in ('main_window', 'window_layout_preserved', 'group_dialog_verified')))
     entries = audit.get('by_code')
     checks.add('ui_entries_object', isinstance(entries, dict))
     entries = entries if isinstance(entries, dict) else {}
     rows = {r.get('code'): r for r in doc.get('rows', []) if isinstance(r, dict) and isinstance(r.get('code'), str)}
     errors, unresolved = [], []
+    local_receipts = {}
+    def local_proves(proof, group, code, present):
+        ref = proof.get('local_file_receipt') or audit.get('local_file_receipt')
+        if not isinstance(ref, str) or not Path(ref).is_absolute():
+            return False
+        if ref not in local_receipts:
+            try:
+                local_receipts[ref] = json.loads(Path(ref).read_text(encoding='utf-8'))
+            except (OSError, ValueError):
+                local_receipts[ref] = {}
+        receipt = local_receipts[ref]
+        return (receipt.get('schema_version') == 'ths-local-verification-1'
+                and receipt.get('source') == 'local_file' and receipt.get('pass') is True
+                and receipt.get('verified_at') == proof.get('verified_at')
+                and (proof.get('status') != 'added' or receipt.get('settings_saved') is True)
+                and any(p.get('group') == group and p.get('code') == code and p.get('present') is present
+                        and p.get('pass') is True for p in receipt.get('checks', {}).get('targets', [])))
     for code in classified_codes:
         item = entries.get(code)
         row = rows.get(code, {})
@@ -438,6 +465,8 @@ def _validate_ui(doc, audit, classification_path, classified_codes, checks, stri
                     errors.append(f'{code}: target lacks saved readback proof')
                 if status == 'already_present' and proof.get('status') != 'already_present':
                     errors.append(f'{code}: changed target cannot be an unchanged receipt')
+                if str(proof.get('verification_method', '')).startswith('local_file') and not local_proves(proof, proof.get('target_group'), code, True):
+                    errors.append(f'{code}: local target receipt is missing, failed or does not cover this target')
         elif action != 'remove' and (item.get('target_group') != (targets or [None])[0] or item.get('verified_target_group') != (targets or [None])[0]):
             errors.append(f'{code}: actual target differs from classification')
         if not text(item.get('verification_method')) or not timestamp(item.get('verified_at')) or item.get('readback_verified') is not True:
@@ -446,6 +475,10 @@ def _validate_ui(doc, audit, classification_path, classified_codes, checks, stri
             absent = item.get('verified_absent_source_groups')
             if not isinstance(absent, list) or not set(source_groups(plan)) <= set(x for x in absent if isinstance(x, str)):
                 errors.append(f'{code}: source removal not verified')
+            if str(item.get('verification_method', '')).startswith('local_file'):
+                for source in source_groups(plan):
+                    if not local_proves(item, source, code, False):
+                        errors.append(f'{code}: local removal receipt does not cover source {source}')
     for code, item in entries.items():
         if code not in rows:
             errors.append(f'{code}: unexpected receipt code')
@@ -454,6 +487,10 @@ def _validate_ui(doc, audit, classification_path, classified_codes, checks, stri
         elif code not in classified_codes and item.get('status') in {'added', 'moved', 'removed'}:
             errors.append(f'{code}: unclassified stock was changed')
     no_changes = audit.get('no_changes_needed') is True and all(isinstance(entries.get(c), dict) and entries[c].get('status') == 'already_present' for c in classified_codes)
+    local_only = (audit.get('execution_mode') == 'local_read_only_no_changes' and no_changes
+                  and all(str(proof.get('verification_method', '')).startswith('local_file')
+                          for c in classified_codes for proof in entries[c].get('targets', [])))
+    checks.add('ui_preflight', local_only or all(preflight.get(k) is True for k in ('main_window', 'window_layout_preserved', 'group_dialog_verified')))
     checks.add('ui_persisted', audit.get('settings_saved') is True or no_changes)
     checks.add('ui_readback_contract', not errors, '; '.join(errors[:50]))
     if strict:

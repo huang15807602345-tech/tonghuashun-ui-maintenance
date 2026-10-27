@@ -35,6 +35,59 @@ class ClassificationTests(TestCase):
         self.assertTrue(self.check().passed, self.check().items)
         self.assertTrue(self.check_ui().passed, self.check_ui().items)
 
+    def local_receipt(self, *, passed=True, group='液冷', status='added'):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        path = Path(temporary.name) / 'local_receipt.json'
+        stamp = '2026-10-27T10:00:00+08:00'
+        path.write_text(json.dumps({'schema_version':'ths-local-verification-1', 'source':'local_file',
+            'pass':passed, 'settings_saved':status=='added', 'verified_at':stamp,
+            'checks':{'targets':[{'group':group,'code':'000001','present':True,'pass':True}]}}))
+        item = self.audit['by_code']['000001']
+        item.update(status=status, verification_method='local_file_after_save', verified_at=stamp,
+                    local_file_receipt=str(path))
+        for proof in item['targets']:
+            proof.update(status=status, verification_method='local_file_after_save', verified_at=stamp,
+                         local_file_receipt=str(path))
+        return path
+
+    def test_local_snapshot_can_replace_live_ui_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'snapshot.json'
+            original = self.doc['group_snapshot']
+            path.write_text(json.dumps({'schema_version':'ths-local-groups-1','source':'local_file',
+                'status':'complete','directory_complete':True,'order':original['groups'],
+                'captured_at':original['captured_at']}))
+            original.update(source='local_file',snapshot_path=str(path))
+            self.assertTrue(self.check().passed,self.check().items)
+            path.unlink()
+            self.assertFalse(self.check().passed)
+
+    def test_saved_local_receipt_is_accepted(self):
+        self.local_receipt()
+        self.assertTrue(self.check_ui().passed,self.check_ui().items)
+
+    def test_failed_local_receipt_cannot_be_claimed_as_success(self):
+        self.local_receipt(passed=False)
+        self.assertFalse(self.check_ui().passed)
+
+    def test_local_receipt_must_cover_exact_target(self):
+        self.local_receipt(group='消费')
+        self.assertFalse(self.check_ui().passed)
+
+    def test_local_receipt_timestamp_cannot_be_relabelled(self):
+        self.local_receipt()
+        self.audit['by_code']['000001']['targets'][0]['verified_at']='2026-10-28T10:00:00+08:00'
+        self.assertFalse(self.check_ui().passed)
+
+    def test_no_change_local_run_does_not_need_fake_ui_preflight(self):
+        self.local_receipt(status='already_present')
+        self.audit.update(execution_mode='local_read_only_no_changes',no_changes_needed=True,
+                          settings_saved=False,preflight={})
+        self.assertTrue(self.check_ui().passed,self.check_ui().items)
+        self.audit['by_code']['000001']['targets'][0]['verification_method']='ui_targeted_readback'
+        self.assertFalse(self.check_ui().passed)
+
     def test_missing_all_reasons_cannot_write(self):
         for card in self.doc['rows'][0]['source_reasons'].values():
             card.update(status='missing', reason='')
@@ -230,10 +283,25 @@ class ClassificationTests(TestCase):
             p=Path(folder)/'input.json';out=Path(folder)/'manifest.json';p.write_text(json.dumps(self.doc))
             result=subprocess.run([sys.executable,'-B',str(ROOT/'scripts/build_ui_manifest.py'),'--input',str(p),'--output',str(out)],capture_output=True,text=True)
             self.assertEqual(result.returncode,0,result.stdout+result.stderr)
-            action=json.loads(out.read_text())['actions'][0]
+            manifest=json.loads(out.read_text());action=manifest['actions'][0]
             self.assertEqual(action['target_groups'],['液冷','消费'])
             self.assertEqual(action['removal_requires_all_targets_verified'],['液冷','消费'])
             self.assertEqual(len(action['target_actions']),2)
+            self.assertEqual(manifest['execution']['module'],'scripts/ui_ops.mjs')
+            self.assertEqual(manifest['execution']['save_confirmation'],['saveBatch','local_groups.py verify','confirmSaved'])
+            self.assertTrue(action['market_resolution_required'])
+            self.assertTrue(all(t['operation']=='addStocks' for t in action['target_actions']))
+
+    def test_ui_manifest_preserves_explicit_beijing_market_and_local_noop_route(self):
+        self.doc['rows'][0]['market']='BJ'
+        with tempfile.TemporaryDirectory() as folder:
+            p=Path(folder)/'input.json';out=Path(folder)/'manifest.json';p.write_text(json.dumps(self.doc))
+            result=subprocess.run([sys.executable,'-B',str(ROOT/'scripts/build_ui_manifest.py'),'--input',str(p),'--output',str(out)],capture_output=True,text=True)
+            self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+            manifest=json.loads(out.read_text())
+            self.assertEqual(manifest['actions'][0]['market'],'BJ')
+            self.assertFalse(manifest['actions'][0]['market_resolution_required'])
+            self.assertEqual(manifest['execution']['operation_map']['none'],['local_file_check'])
 
     def test_low_confidence_requires_search_and_trend_before_promotion(self):
         self.doc['rows'][0]['reason_selection']['initial_confidence']='low'

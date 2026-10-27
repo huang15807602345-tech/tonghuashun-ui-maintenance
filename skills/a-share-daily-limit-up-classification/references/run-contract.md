@@ -16,10 +16,12 @@
 
 - `source_policy.minimum_reason_websites`至少3，`st_detail_policy=exclude_before_detail`；来源开放，选股宝/东方财富/同花顺是优先来源，不是封闭白名单。
 - `population`包括 `status=reconciled`、`final_data_verified=true`、至少两个已核验名单来源的`source_counts`、`non_st_count`、`excluded_risk_warning_count`、完整`codes`、`codes_sha256`和无未解决差异的`conflicts=[]`。失败来源单列`source_failures`，不填0。哈希算法为排序后的六位代码用换行连接、无末尾换行的UTF-8 SHA-256。真实零只还须`empty_confirmed=true`。
-- `group_snapshot`来自本次live_ui，记录`captured_at`、完整精确`groups`、`ui_total`、`complete=true`。旧状态文件只作导航。
+- `group_snapshot`日常来自本次客户端本地文件（`source=local_file`），由UI技能的local_groups.py输出，包含`captured_at`、完整精确`groups`、`ui_total`、`complete=true`及绝对`snapshot_path`。校验器核对证据快照与目录一致。`ui_total`沿用旧字段名表示目录总数，不声称读取UI；异常局部恢复可保留live_ui来源。共享历史档案不作当前来源。
 - `new_groups`每项记录`name`、完整`members`、`not_reusing_reason`、具体`market_linkage_evidence`及`creation_authorized`。members仅为本次最终名单内拟写入股票；linked_members列出当日或近十交易日已核验的相关活跃股票，可含不在本次最终名单的代码作为联动证据，不自动写入这些代码。一般至少两只linked_members，不能要求本日同时涨停两只才允许复用/建立合理分组；真正只有单股证据的例外在用户明确要求时用`user_requested_singleton=true`并保存原始授权依据。不得用普通业务标签绕过建组条件。
 
 每行保留`code/name`、连续板数及其依据、封板时间和精度、`source_reasons`、业务基础、即时催化、`market_context_evidence`、最终交易原因、个股放大器、`reason_selection`、`classification`、`evidence_status`、`ui_plan`。
+
+实际UI证券输入另需明确`market`（SH/SZ/BJ，或UI技能认可的等价值）及来源，可直接保存在行内。缺失时manifest标记待补，从本轮原始行情或可靠代码表补齐，不重做原因研究、不按代码首位猜测。该补充不改变4.0分类目标数组。
 
 ### 原因材料
 
@@ -59,13 +61,15 @@
 
 ## UI回执
 
+manifest的`execution`声明UI技能、模块相对路径、函数路由和保存确认顺序。加载一次 `scripts/ui_ops.mjs`，普通动作复用同一控制器；不保存函数对象或固定AX编号。`saveBatch`产出的期望与成功本地回执分别存入本轮绝对路径，`confirmSaved`后更新基线。移动后的最终确认须同时含全部有效目标存在与错误源组不存在，不能仅确认删除。此要求并入原批次文件确认，不额外启动UI检查。
+
 示例见 [ui-audit](../examples/minimal-valid-ui-audit.json)。绑定`trade_date`与实际分类文件的SHA-256。
 
 - `preflight`只检查`main_window=true`、`window_layout_preserved=true`、`group_dialog_verified=true`。不要求最大化或重复点击入口。
 - `by_code`保存对应动作和总体`status=already_present/added/moved/removed/failed/pending`、`verification_method/verified_at/readback_verified`。4.0成功项还必须有`targets`数组，逐目标保存`target_group/verified_target_group/status=added或already_present/verification_method/verified_at/readback_verified=true`，一个成功不能代替双目标成功。move/remove另记`verified_absent_source_groups`；全部目标确认后才能删除源组。
-- 实际变更须外层保存后重开核验，`settings_saved=true`。全为已存在且无变更时可以`no_changes_needed=true`，仍须实际读取核验，不能强迫无改动保存。
+- 实际变更须外层保存后读取客户端本地文件确认，`settings_saved=true`；正常不重开UI盘点。方法固定为`local_file_after_save`，逐目标附`local_file_receipt=ABS_PATH`，回执必须pass=true并覆盖代码/组；校验器会读取该回执。其`readback_verified=true`表示文件回读。无修改用`local_file_current`及`no_changes_needed=true`；可用`execution_mode=local_read_only_no_changes`，不伪造UI预检，不强迫保存或启动UI。来源缺失/不一致才局部UI回读，明确记ui_targeted_readback。检查协议见UI技能references/local-files.md。
 - 失败/pending保留`reason`。缺回执、错目标、缺核验材料都不能记UI完成。
 
-`validate_classification.py --input ABS_JSON --stage pre-ui`用于写前；`build_ui_manifest.py`会再次调用同一校验，不可绕过。写后用`--stage final --ui-audit ABS_AUDIT --strict-ui-success`判完整完成；不加strict只检查回执结构，存在pending/failed仍不是业务完成，必须查看`ui_all_success`。
+`build_ui_manifest.py`生成动作时内部执行pre-ui校验；不要再手动重复跑同一份数据。独立研究的写前检查可用`validate_classification.py --input ABS_JSON --stage pre-ui`。写后用`--stage final --ui-audit ABS_AUDIT --strict-ui-success`判完整完成；不加strict只检查回执结构，存在pending/failed仍不是业务完成，必须查看`ui_all_success`。
 
 最后文字逐股覆盖全部非ST最终名单，列出主原因、单/双主组、逐组置信度与真实UI结果。末尾单列未分类、排除及失败项，包含补查/走势分析、数量窗口和实际缺口。summary按股票计数，双分类仍是一只；另可报主题关系数。排序一股在两个不同组各计一次，组内按代码去重，连板名单仍每码一次。详细来源留JSON/可选MD，不生成HTML。UI恢复只查UI技能。

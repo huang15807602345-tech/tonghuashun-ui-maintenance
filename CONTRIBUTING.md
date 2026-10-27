@@ -7,8 +7,12 @@
 ```bash
 python3 -m unittest discover -s tests -v
 python3 -B skills/a-share-daily-limit-up-classification/scripts/test_classification.py
+python3 -B skills/tonghuashun-ui-maintenance/scripts/test_local_groups.py
+node --test skills/tonghuashun-ui-maintenance/scripts/test_ui_ops.mjs
 python3 scripts/validate_package.py
 ```
+
+本地文件解析测试使用隔离合成归档，桌面控制器测试使用模拟app；可选真实AX夹具不得提交。不要把本机watchlist、snapshot或receipt当作公开测试样本。
 
 UI改动应先只读确认控件和窗口来源，在获得授权的范围内验证；请分别说明“静态检查通过”“只读观察通过”和“实际写入并回读通过”。没有实际操作就不要声称已验证写入。
 

@@ -9,9 +9,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
       - name: Run offline tests
         run: python3 -m unittest discover -s tests -v
       - name: Validate research contract and handoff
         run: python3 -B skills/a-share-daily-limit-up-classification/scripts/test_classification.py
+      - name: Verify local group parser with isolated fixtures
+        run: python3 -B skills/tonghuashun-ui-maintenance/scripts/test_local_groups.py
+      - name: Verify reusable UI controller with simulated desktop
+        run: node --test skills/tonghuashun-ui-maintenance/scripts/test_ui_ops.mjs
       - name: Validate package
         run: python3 scripts/validate_package.py
